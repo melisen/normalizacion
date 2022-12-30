@@ -1,4 +1,5 @@
-//const {denormalize} = require("normalizr");
+const {denormalize} = require("normalizr");
+const {schema } = require("normalizr")
 
 
 //' conexión del socket del lado del cliente
@@ -104,18 +105,43 @@ function enviarMensaje(event){
 socket.on('productos', data =>{
     render(data)
 })
-
-socket.on('mensajes', data =>{
-    console.log("% DE COMPRESIÓN NORMALIZADO", JSON.stringify(data).length);
-    const denormalizedMensajes = denormalize(data, mensajeSchema, data.entities);
-    console.log("% DE COMPRESIÓN DESNORMALIZADO", JSON.stringify(denormalizedMensajes).length);
-    renderChat(denormalizedMensajes);
-})
-
-
 socket.on('prod-test', data =>{
     renderProdTest(data)
 })
+
+
+
+        //esquemas para normalizacion
+        const mailSchema = new schema.Entity('mail');
+        const nombreSchema = new schema.Entity('nombr');
+        const apellidoSchema = new schema.Entity('apellido');
+        const edadSchema = new schema.Entity('edad');
+        const aliasSchema = new schema.Entity('alias');
+        const avatarSchema = new schema.Entity('avatar');
+        const authorSchema = new schema.Entity('author',{
+            author:{
+                id: mailSchema,
+                nombre:nombreSchema,
+                apellido: apellidoSchema,
+                edad: edadSchema,
+                alias: aliasSchema,
+                avatar: avatarSchema
+            },
+            text: [textSchema]
+        });
+
+
+
+
+socket.on('mensajes', data =>{
+    console.log('MENSAJES RECIBIDO')
+    console.log("% DE COMPRESIÓN NORMALIZADO", JSON.stringify(data).length);
+    const denormalizedMensajes = denormalize(data.result, authorSchema, data.entities);
+    console.log("% DE COMPRESIÓN DESNORMALIZADO", JSON.stringify(denormalizedMensajes).length);
+    renderChat(denormalizedMensajes.text);
+})
+
+
 
 
 

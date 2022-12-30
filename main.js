@@ -81,6 +81,27 @@ async function conectarMongo(){
 conectarMongo()
 
 
+        //esquemas para normalizacion
+        const mailSchema = new schema.Entity('email');
+        const nombreSchema = new schema.Entity('nombre');
+        const apellidoSchema = new schema.Entity('apellido');
+        const edadSchema = new schema.Entity('edad');
+        const aliasSchema = new schema.Entity('alias');
+        const avatarSchema = new schema.Entity('avatar');
+        const textSchema = new schema.Entity('text');
+
+        const authorSchema = new schema.Entity('author',{
+            author:{
+                id: mailSchema,
+                nombre:nombreSchema,
+                apellido: apellidoSchema,
+                edad: edadSchema,
+                alias: aliasSchema,
+                avatar: avatarSchema
+            },
+            text: [textSchema]
+        });
+
 
 
 
@@ -107,7 +128,7 @@ app.get('/api/productos-test', async (req, res)=>{
 //'1) conexión del lado del servidor
 io.on('connection', async (socket) =>{
         console.log(`io socket conectado ${socket.id}`)
-        socket.emit("mensajes", await Mensajes.listarTodos())
+        //socket.emit("mensajes", await Mensajes.listarTodos())
         socket.emit("productos", await arrayProductos.getAll())
         socket.emit("prod-test", crearProductosRandom())
 
@@ -122,29 +143,10 @@ io.on('connection', async (socket) =>{
         socket.on('new_msg', async (data)=>{
             await Mensajes.guardar(data);
             const listaMensajes = await Mensajes.listarTodos();
+
 //NORMALIZACION Y ENVÍO DE MENSAJES
-        //esquemas para normalizacion
-        const emailSchema = new schema.Entity('email');
-        const nombreSchema = new schema.Entity('nombre');
-        const apellidoSchema = new schema.Entity('apellido');
-        const edadSchema = new schema.Entity('edad');
-        const aliasSchema = new schema.Entity('alias');
-        const avatarSchema = new schema.Entity('avatar');
-        const authorSchema = new schema.Entity('author',{
-            id: emailSchema,
-            nombreSchema,
-            apellidoSchema,
-            edadSchema,
-            aliasSchema,
-            avatarSchema              
-        });
-        const textSchema = new schema.Entity('text');
-        const mensajeSchema = new schema.Entity('msjs', {
-            id: 'mensajesID',
-            author: authorSchema,
-            text: [ textSchema ]
-        });
-            const normalizado = normalize(listaMensajes, mensajeSchema);
+            const normalizado = normalize(listaMensajes, authorSchema);
+            console.log(JSON.stringify(normalizado))
             io.sockets.emit('mensajes', normalizado)
         })
         

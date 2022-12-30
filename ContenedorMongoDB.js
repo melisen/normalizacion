@@ -23,7 +23,7 @@ class ContenedorMongoDB{
 
     async listarTodos(){
         const todos = await this.modelo.find({})
-
+        return todos
     }
 
 
