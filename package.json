@@ -1,0 +1,25 @@
+{
+  "name": "9--normalizacion",
+  "version": "1.0.0",
+  "description": "1° En caso de que se eliminen las tablas del repositorio, para crear nuevas tablas correspondientes ejecutar crear-tabla-productos.js y creat-tabla-mensajes.js\r 2° Luego al ejecutar main.js se pueden realizar las acciones sobre productos y los mensajes de chat en localhost:8080",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-handlebars": "^6.0.6",
+    "faker": "^6.6.6",
+    "mongoose": "^6.8.2",
+    "mysql": "^2.18.1",
+    "normalizr": "^3.6.2",
+    "socket.io": "^4.5.4"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "nodemon": "^2.0.20"
+  }
+}
