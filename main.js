@@ -3,14 +3,16 @@ const express = require('express');
 const handlebars = require('express-handlebars');
 const {Server: HTTPServer} = require("http")
 const {Server: IOServer} = require("socket.io");
-const {faker} = require("@faker-js/faker");
-const  mongoose  = require("mongoose");
-const {normalize} = require("normalizr");
-const {schema} = require("normalizr");
-
 const app = express();
 const httpServer = new HTTPServer(app)
 const io = new IOServer(httpServer)
+const {faker} = require("@faker-js/faker");
+const  {mongoose}  = require("mongoose");
+const {normalize} = require("normalizr");
+const {schema} = require("normalizr");
+
+
+
 
 //PERSISTENCIA PRODUCTOS
 const {optionsSQL} = require("./options/mysql.js");
@@ -102,6 +104,22 @@ conectarMongo()
             text: [textSchema]
         });
 
+        const mapearMsjs = (arrMensajes) =>{
+            const mapNormalizar = arrMensajes.map((item)=>(
+                {
+                    email: item.email,
+                    nombre: item.nombre, 
+                    apellido:  item.apellido,
+                    edad:  item.edad,
+                    alias:  item.alias,
+                    avatar:  item.avatar,
+                    text:  item.text,
+                    fecha:  item.fecha
+                }
+            ))
+            return mapNormalizar
+        }
+
 
 
 
@@ -110,11 +128,17 @@ conectarMongo()
 //RUTAS
 
  app.get('/', async (req, res)=>{
-    const listaProductos = await arrayProductos.getAll();
-    if(listaProductos){
-        res.render("main", { layout: "vista-productos", productos: listaProductos });
-    }else{
-        res.render("main", {layout: "error"})
+    try{
+        const listaProductos = await arrayProductos.getAll();
+        console.log("se pudo acceder a productos")
+        if(listaProductos){
+            res.render("main", { layout: "vista-productos", productos: listaProductos });
+        }else{
+            res.render("main", {layout: "error"})
+        }
+    }
+    catch(err){
+        console.log(err)
     }
 })
 
@@ -127,10 +151,13 @@ app.get('/api/productos-test', async (req, res)=>{
 //*WEBSOCKET PRODUCTOS Y MENSAJES
 //'1) conexión del lado del servidor
 io.on('connection', async (socket) =>{
-        console.log(`io socket conectado ${socket.id}`)
-        //socket.emit("mensajes", await Mensajes.listarTodos())
-        socket.emit("productos", await arrayProductos.getAll())
-        socket.emit("prod-test", crearProductosRandom())
+        console.log(`io socket conectado ${socket.id}`);
+            const listaMensajes =  Mensajes.listarTodos()
+            const arrMapeado = mapearMsjs(listaMensajes)
+            const normalizado = normalize(arrMapeado, authorSchema);
+            socket.emit("mensajes", normalizado)
+            socket.emit("productos", await arrayProductos.getAll())
+            socket.emit("prod-test", crearProductosRandom())
 
         //' 3) escuchar un cliente (un objeto de producto)
         socket.on('new_prod', async (data) =>{
@@ -145,7 +172,8 @@ io.on('connection', async (socket) =>{
             const listaMensajes = await Mensajes.listarTodos();
 
 //NORMALIZACION Y ENVÍO DE MENSAJES
-            const normalizado = normalize(listaMensajes, authorSchema);
+            const arrMapeado = mapearMsjs(listaMensajes)
+            const normalizado = normalize(arrMapeado, authorSchema);
             console.log(JSON.stringify(normalizado))
             io.sockets.emit('mensajes', normalizado)
         })
@@ -153,6 +181,9 @@ io.on('connection', async (socket) =>{
 })
 
 
+
+
 httpServer.listen(8080, ()=>{
     console.log('servidor de express iniciado')
+
 })

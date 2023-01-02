@@ -1,9 +1,10 @@
-const {denormalize} = require("normalizr");
-const {schema } = require("normalizr")
 
+const {denormalize} = require("normalizr");
 
 //' conexión del socket del lado del cliente
 const socket = io.connect()
+
+
 
 function render(data){
     //por cada objeto de producto ingresado crear una row en la tabla con la información:
@@ -31,10 +32,10 @@ function renderChat(data){
         `
         <li style="display: flex; flex-direction:row; ">
             <div id="autor" style="font-weight: bold; color:blue;" >
-                ${msg.autor} <span style="color: brown; font-weight:normal; margin-left:5px;">  ${msg.fecha}  :</span> 
+                ${msg.author.nombre} <span style="color: brown; font-weight:normal; margin-left:5px;">  ${msg.fecha}  :</span> 
             </div>
             <div id="msj"  style="color: green; font-style: italic; margin-left:15px;">
-               ${msg.msj}
+               ${msg.text}
             </div>
         </li>
       `).join(" ");
